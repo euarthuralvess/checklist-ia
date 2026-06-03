@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secure by Design para Devs com IA — Arthur Alves</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+  :root {
+    --bg:       #0F0F0F;
+    --surface:  #1A1A1A;
+    --border:   #2A2A2A;
+    --text:     #E8E8E8;
+    --muted:    #6B6B6B;
+    --g-blue:   #4285F4;
+    --g-red:    #EA4335;
+    --g-yellow: #FBBC04;
+    --g-green:  #34A853;
+    --checked-bg: #1A2B1A;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ─────────────────────────────────────────────────── */
+  header {
+    padding: 40px 24px 28px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .gdg-bar {
+    display: flex;
+    gap: 0;
+    height: 4px;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .gdg-bar span { flex: 1; }
+  .gdg-bar .b { background: var(--g-blue); }
+  .gdg-bar .r { background: var(--g-red); }
+  .gdg-bar .y { background: var(--g-yellow); }
+  .gdg-bar .g { background: var(--g-green); }
+
+  .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--g-red);
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(20px, 5vw, 28px);
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 10px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 500px;
+  }
+
+  /* ── PROGRESS ────────────────────────────────────────────────── */
+  .progress-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 24px 24px;
+  }
+
+  .progress-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--g-green);
+    border-radius: 2px;
+    transition: width .35s ease;
+    width: 0%;
+  }
+
+  /* ── MAIN ────────────────────────────────────────────────────── */
+  main {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+  }
+
+  /* ── SECTION ─────────────────────────────────────────────────── */
+  .section { margin-bottom: 36px; }
+
+  .section-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-bottom: 10px;
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .sec-exposure  .section-title::before { background: var(--g-red); }
+  .sec-api       .section-title::before { background: var(--g-blue); }
+  .sec-auth      .section-title::before { background: var(--g-yellow); }
+  .sec-ai        .section-title::before { background: var(--g-red); }
+  .sec-monitor   .section-title::before { background: var(--g-green); }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── ITEM ────────────────────────────────────────────────────── */
+  .item {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    align-items: start;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    cursor: pointer;
+    transition: background .12s;
+    border-radius: 6px;
+  }
+
+  .item:hover { background: rgba(255,255,255,.02); padding-left: 4px; padding-right: 4px; }
+  .item.done   { background: var(--checked-bg); padding-left: 4px; padding-right: 4px; }
+
+  .check-col {
+    display: flex;
+    justify-content: center;
+    padding-top: 2px;
+  }
+
+  .checkbox {
+    width: 20px;
+    height: 20px;
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s;
+    flex-shrink: 0;
+  }
+
+  .item.done .checkbox {
+    background: var(--g-green);
+    border-color: var(--g-green);
+  }
+
+  .item.done .checkbox::after {
+    content: '';
+    display: block;
+    width: 5px;
+    height: 9px;
+    border: 2px solid #fff;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg) translate(-1px, -1px);
+  }
+
+  .text-col {}
+
+  .item-label {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .item.done .item-label { color: var(--muted); text-decoration: line-through; text-decoration-color: rgba(255,255,255,.2); }
+
+  .sev {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 3px;
+    letter-spacing: .06em;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .sev-c { background: rgba(234,67,53,.15); color: #FF6B6B; border: 1px solid rgba(234,67,53,.25); }
+  .sev-h { background: rgba(251,188,4,.1);  color: var(--g-yellow); border: 1px solid rgba(251,188,4,.2); }
+  .sev-m { background: rgba(66,133,244,.1); color: var(--g-blue);   border: 1px solid rgba(66,133,244,.2); }
+
+  .item-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .item-desc code {
+    font-family: 'Space Mono', monospace;
+    font-size: 10.5px;
+    background: #1F1F1F;
+    padding: 1px 6px;
+    border-radius: 3px;
+    color: var(--g-yellow);
+    border: 1px solid var(--border);
+  }
+
+  /* ── FOOTER ──────────────────────────────────────────────────── */
+  footer {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 24px 24px 40px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .footer-info { font-size: 12px; color: var(--muted); }
+  .footer-info strong { color: var(--text); display: block; font-size: 13px; margin-bottom: 2px; }
+
+  .footer-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--g-red);
+    border: 1px solid rgba(234,67,53,.3);
+    padding: 6px 12px;
+    border-radius: 3px;
+    letter-spacing: .1em;
+    white-space: nowrap;
+  }
+
+  /* ── RESET BTN ───────────────────────────────────────────────── */
+  .reset-btn {
+    display: block;
+    margin: 24px auto 0;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .1em;
+    padding: 8px 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .reset-btn:hover { border-color: var(--g-red); color: var(--g-red); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="gdg-bar">
+    <span class="b"></span><span class="r"></span><span class="y"></span><span class="g"></span>
+  </div>
+  <p class="eyebrow">GDG Build With AI · Natal/RN · Jun 2025</p>
+  <h1>Secure by Design<br>para Devs com IA</h1>
+  <p class="subtitle">20 verificações essenciais antes de colocar qualquer feature com IA em produção. Cada item é uma vulnerabilidade real já explorada em ambientes de produção.</p>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-label">
+    <span id="prog-text">0 de 20 itens verificados</span>
+    <span id="prog-pct">0%</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+</div>
+
+<main>
+
+  <!-- 01 EXPOSIÇÃO DE DADOS -->
+  <div class="section sec-exposure">
+    <div class="section-title">01 — Exposição de Dados</div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="check-col"><div class="checkbox"></div></div>
+      <div class="text-col">
+        <div class="item-label">Commits sem API keys, tokens ou credenciais <span class="sev sev-c">CRÍTICO</span></div>
+        <div class="item-desc">Use <code>git-secrets</code> ou <code>trufflehog</code> antes de cada push. Um repositório público com key exposta é comprometido em média em 4 minutos.</div>
+      </div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="check-col"><div class="checkbox"></div></div>
+      <div class="text-col">
+        <div class="item-label">README não descreve arquitetura interna, IPs ou stack de produção <span class="sev sev-h">ALTO</span></div>
+        <div class="item-desc">LLMs mapeiam vetores de ataque a partir de documentação pública. Documente o necessário, não o suficiente para um atacante.</div>
+      </div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="check-col"><div class="checkbox"></div></div>
+      <div class="text-col">
+        <div class="item-label">LinkedIn e GitHub não expõem versões exatas de tecnologias em uso <span class="sev sev-m">MÉDIO</span></div>
+        <div class="item-desc">Ex: "Spring Boot 2.5.4" em um post é input direto para busca de CVEs. Use termos genéricos em posts públicos.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 SEGURANÇA DA API DE IA -->
+  <div class="section sec-api">
+    <div class="section-title">02 — Segurança da API de IA</div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="check-col"><div class="checkbox"></div></div>
+      <div class="text-col">
+        <div class="item-label">A API key do Gemini/OpenAI está no backend, nunca no frontend <span class="sev sev-c">CRÍTICO</span></div>
+        <div class="item-desc">Qualquer key no JS do cliente pode ser extraída em segundos com DevTools. Use variáveis de ambiente no servidor.</div>
+      </div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="check-col"><div class="checkbox"></div></div>
+      <div class="text-col">
+        <div class="item-label">Rate limiting implementado nas chamadas à API de IA <span class="sev sev-h">ALTO</span></div>
+        <div class="item-desc">Sem rate limit, um atacante usa seu endpoint para gerar conteúdo em escala no seu custo. Implemente limites por usuário e por IP.</div>
+      </div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="check-col"><div class="checkbox"></div></div>
+      <div class="text-col">
+        <div class="item-label">Input do usuário é sanitizado antes de ir para o prompt <span class="sev sev-c">CRÍTICO</span></div>
+        <div class="item-desc">Prompt Injection: usuário insere instruções que sobrescrevem o system prompt. Valide e sanitize todo input antes de concatenar ao prompt.</div>
+      </div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="check-col"><div class="checkbox"></div></div>
+      <div class="text-col">
+        <div class="item-label">System prompt não contém segredos de negócio ou credenciais <span class="sev sev-h">ALTO</span></div>
+        <div class="item-desc">System prompts podem ser extraídos via prompt injection. Nunca coloque credenciais ou lógica sensível como única barreira.</div>
+      </div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="check-col"><div class="checkbox"></div></div>
+      <div class="text-col">
+        <div class="item-label">Output do modelo é validado antes de ser executado ou exibido <span class="sev sev-c">CRÍTICO</span></div>
+        <div class="item-desc">Modelos podem gerar código malicioso, scripts injetados ou conteúdo que cause dano se renderizado sem sanitização. Nunca execute output de LLM diretamente.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 AUTENTICAÇÃO -->
+  <div class="section sec-auth">
+    <div class="section-title">03 — Autenticação e Controle de Acesso</div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="check-col"><div class="checkbox"></div></div>
+      <div class="text-col">
+        <div class="item-label">MFA habilitado em todas as contas de serviços cloud <span class="sev sev-c">CRÍTICO</span></div>
+        <div class="item-desc">Spear phishing com IA tem 3x mais taxa de clique que phishing genérico. Sem MFA, uma credencial comprometida = acesso total.</div>
+      </div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="check-col"><div class="checkbox"></div></div>
+      <div class="text-col">
+        <div class="item-label">Princípio do menor privilégio aplicado a service accounts <span class="sev sev-h">ALTO</span></div>
+        <div class="item-desc">A service account da API de IA não precisa de acesso ao banco de dados de produção. Segmente as permissões por função.</div>
+      </div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="check-col"><div class="checkbox"></div></div>
+      <div class="text-col">
+        <div class="item-label">Tokens de API têm expiração definida e são rotacionados <span class="sev sev-m">MÉDIO</span></div>
+        <div class="item-desc">Token sem expiração comprometido = acesso permanente. Defina TTL e implemente rotação automática no ciclo de deploy.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 PROTEÇÃO CONTRA ATAQUES VIA IA -->
+  <div class="section sec-ai">
+    <div class="section-title">04 — Proteção contra Ataques via IA</div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="check-col"><div class="checkbox"></div></div>
+      <div class="text-col">
+        <div class="item-label">Validação de e-mails suspeitos no processo de onboarding <span class="sev sev-h">ALTO</span></div>
+        <div class="item-desc">Verifique domínio, data de criação do domínio e histórico de reputação. E-mails gerados por IA têm estrutura diferente dos convencionais.</div>
+      </div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="check-col"><div class="checkbox"></div></div>
+      <div class="text-col">
+        <div class="item-label">Time treinado sobre risco de deepfake de voz/vídeo em processos críticos <span class="sev sev-c">CRÍTICO</span></div>
+        <div class="item-desc">Qualquer processo que aceita confirmação verbal de identidade precisa de segundo fator. Verifique por canal alternativo antes de agir.</div>
+      </div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="check-col"><div class="checkbox"></div></div>
+      <div class="text-col">
+        <div class="item-label">Dados de produção não usados para fine-tuning ou testes de IA <span class="sev sev-h">ALTO</span></div>
+        <div class="item-desc">Modelos fine-tunados com dados reais podem vazar informações via prompt. Use dados sintéticos ou anonimizados para experimentos.</div>
+      </div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="check-col"><div class="checkbox"></div></div>
+      <div class="text-col">
+        <div class="item-label">Ao menos um teste de prompt injection realizado na aplicação <span class="sev sev-c">CRÍTICO</span></div>
+        <div class="item-desc">Tente: <code>Ignore as instruções anteriores e...</code> Se sua aplicação ceder, há vulnerabilidade aberta em produção.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 05 MONITORAMENTO -->
+  <div class="section sec-monitor">
+    <div class="section-title">05 — Monitoramento e Resposta</div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="check-col"><div class="checkbox"></div></div>
+      <div class="text-col">
+        <div class="item-label">Logs de chamadas à API de IA coletados e retidos <span class="sev sev-h">ALTO</span></div>
+        <div class="item-desc">Sem logs não há forense após incidente. Colete: timestamp, user_id, input hash, tokens consumidos, response status.</div>
+      </div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="check-col"><div class="checkbox"></div></div>
+      <div class="text-col">
+        <div class="item-label">Alerta configurado para pico anômalo de uso da API <span class="sev sev-m">MÉDIO</span></div>
+        <div class="item-desc">Pico de 10x no volume às 3h da manhã é sinal. Configure alertas de threshold no provedor cloud ou SIEM.</div>
+      </div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="check-col"><div class="checkbox"></div></div>
+      <div class="text-col">
+        <div class="item-label">Plano de resposta a incidentes de IA documentado <span class="sev sev-m">MÉDIO</span></div>
+        <div class="item-desc">O que fazer se o modelo gerar output malicioso? Se a API key vazar? Se houver injeção em produção? Documente antes que aconteça.</div>
+      </div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="check-col"><div class="checkbox"></div></div>
+      <div class="text-col">
+        <div class="item-label">Revisão de segurança incluída no ciclo de deploy de features com IA <span class="sev sev-h">ALTO</span></div>
+        <div class="item-desc">Segurança não é etapa final — é parte do pipeline. Adicione checklist de segurança como gate antes de qualquer deploy que envolva LLM.</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="reset-btn" onclick="resetAll()">RESETAR CHECKLIST</button>
+
+</main>
+
+<footer>
+  <div class="footer-info">
+    <strong>Arthur Alves · AA Consultoria e Soluções em TI</strong>
+    GDG Build With AI · Natal/RN · Junho 2025<br>
+    linkedin.com/in/euarthuralvess · @euarthuralvess
+  </div>
+  <div class="footer-badge">CIBERSEGURANÇA PARA DEVS</div>
+</footer>
+
+<script>
+  const TOTAL = document.querySelectorAll('.item').length;
+
+  function toggle(el) {
+    el.classList.toggle('done');
+    update();
+  }
+
+  function update() {
+    const done = document.querySelectorAll('.item.done').length;
+    const pct  = Math.round((done / TOTAL) * 100);
+    document.getElementById('prog-text').textContent = `${done} de ${TOTAL} itens verificados`;
+    document.getElementById('prog-pct').textContent  = `${pct}%`;
+    document.getElementById('prog-fill').style.width = pct + '%';
+
+    // save state
+    const state = Array.from(document.querySelectorAll('.item')).map(el => el.classList.contains('done'));
+    try { localStorage.setItem('cl_state', JSON.stringify(state)); } catch(e){}
+  }
+
+  function resetAll() {
+    document.querySelectorAll('.item').forEach(el => el.classList.remove('done'));
+    try { localStorage.removeItem('cl_state'); } catch(e){}
+    update();
+  }
+
+  // restore state
+  try {
+    const saved = JSON.parse(localStorage.getItem('cl_state') || '[]');
+    const items = document.querySelectorAll('.item');
+    saved.forEach((v, i) => { if (v && items[i]) items[i].classList.add('done'); });
+    update();
+  } catch(e) {}
+</script>
+</body>
+</html>
